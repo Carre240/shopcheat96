@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Collecte infos visiteurs</title>
+  <title>Cheat</title>
   <style>
     html, body {
       margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden;
@@ -11,6 +11,7 @@
       font-family: 'Courier New', monospace;
       color: white;
       text-align: center;
+      cursor: none;
     }
     canvas {
       position: fixed;
@@ -104,6 +105,7 @@
       padding: 20px;
       box-sizing: border-box;
       position: relative;
+      cursor: none;
     }
     /* Étoiles néon pour le fond */
     .neon-stars {
@@ -1110,7 +1112,7 @@
         this.style.cursor = "default";
         // Affichage de la page des cheats
         setTimeout(() => {
-          document.title = "Les Cheats";
+          document.title = "Cheat";
           document.getElementById('cheatPage').style.display = 'block';
         }, 1500);
       } else {
@@ -1120,4 +1122,3 @@
   </script>
 </body>
 </html>
-
