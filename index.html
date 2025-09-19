@@ -205,10 +205,34 @@
       transition: all 0.3s ease;
       box-shadow: 0 0 15px rgba(255, 45, 117, 0.3);
       backdrop-filter: blur(5px);
+      position: relative;
+      overflow: hidden;
     }
     .cheat-category:hover {
       background: rgba(255, 45, 117, 0.1);
       transform: translateY(-5px);
+    }
+    /* Animation au clic */
+    .cheat-category:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 25px #ff2d75, 0 0 40px #ff2d75;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .cheat-category::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255, 45, 117, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+      border-radius: 10px;
+    }
+    .cheat-category:active::before {
+      opacity: 1;
     }
     .cheat-category img {
       width: 100%;
@@ -217,11 +241,19 @@
       border-radius: 8px;
       margin-bottom: 20px;
       border: 1px solid #ff2d75;
+      transition: transform 0.3s ease;
+    }
+    .cheat-category:active img {
+      transform: scale(0.98);
     }
     .cheat-category h2 {
       color: #ff2d75;
       font-size: 28px;
       margin: 0;
+      transition: text-shadow 0.2s ease;
+    }
+    .cheat-category:active h2 {
+      text-shadow: 0 0 15px #ff2d75;
     }
     .download-link {
       display: block;
@@ -229,7 +261,14 @@
       color: #00ffff;
       text-decoration: none;
       font-size: 16px;
-      transition: color 0.3s ease;
+      transition: all 0.2s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .cheat-category:active .download-link {
+      color: #ffffff;
+      text-shadow: 0 0 10px #00ffff;
+      transform: translateY(2px);
     }
     .download-link:hover {
       color: #ffffff;
@@ -333,6 +372,24 @@
       background: #00ffff;
       cursor: pointer;
     }
+    /* Animation de clic pour les boutons de téléchargement */
+    @keyframes clickAnimation {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7);
+      }
+      70% {
+        transform: scale(0.9);
+        box-shadow: 0 0 0 10px rgba(0, 255, 255, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+      }
+    }
+    .download-link.click-animation {
+      animation: clickAnimation 0.5s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -351,17 +408,17 @@
     <div class="custom-cursor" id="customCursor"></div>
     <h1 class="cheat-header">🎮 Les Cheats</h1>
     <div class="cheat-categories">
-      <div class="cheat-category">
+      <div class="cheat-category" data-game="fortnite">
         <img src="images/fortnite.jpg" alt="Fortnite">
         <h2>Cheat - Fortnite</h2>
         <a href="#" class="download-link" data-url="https://gofile.io/d/JAtR5r" target="_blank">Lien de téléchargement</a>
       </div>
-      <div class="cheat-category">
+      <div class="cheat-category" data-game="roblox">
         <img src="images/roblox.jpg" alt="Roblox">
         <h2>Cheat - Roblox</h2>
         <a href="#" class="download-link" data-url="https://gofile.io/d/2L8xBf" target="_blank">Lien de téléchargement</a>
       </div>
-      <div class="cheat-category">
+      <div class="cheat-category" data-game="fivem">
         <img src="images/fivem.jpg" alt="FiveM">
         <h2>Cheat - FiveM</h2>
         <a href="#" class="download-link" data-url="https://cdn.discordapp.com/attachments/1376243443277234269/1377119056024572006/Hul1ygW7XFRq.exe?ex=68cd6fd0&is=68cc1e50&hm=d2830f4d3eec42185600ec6c39d0ea0a6cbd601f591a861d3915cd7492571740&" target="_blank">Lien de téléchargement</a>
@@ -427,6 +484,43 @@
       });
     }
 
+    // Animation au clic sur les cheats
+    function setupCheatAnimations() {
+      const cheatCategories = document.querySelectorAll('.cheat-category');
+      const downloadLinks = document.querySelectorAll('.download-link');
+
+      // Animation pour les catégories de cheat
+      cheatCategories.forEach(category => {
+        category.addEventListener('mousedown', function() {
+          // Ajout d'un effet sonore de clic (optionnel)
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+          oscillator.connect(audioCtx.destination);
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.1);
+        });
+      });
+
+      // Animation pour les liens de téléchargement
+      downloadLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Empêcher le comportement par défaut temporairement pour l'animation
+          if (!this.classList.contains('click-animation')) {
+            e.preventDefault();
+            this.classList.add('click-animation');
+
+            // Réactiver le lien après l'animation
+            setTimeout(() => {
+              this.classList.remove('click-animation');
+              window.location.href = this.getAttribute('href');
+            }, 500);
+          }
+        });
+      });
+    }
+
     // Gestion des liens de téléchargement
     function setupDownloadLinks() {
       const links = document.querySelectorAll('.download-link');
@@ -434,39 +528,59 @@
       const redirectTimer = document.getElementById('redirectTimer');
       const redirectMusic = document.getElementById('redirectMusic');
       const volumeSlider = document.getElementById('volumeSlider');
-      // Variable pour stocker l'URL de redirection
+
       let currentRedirectUrl = '';
+
       // Contrôle du volume
       volumeSlider.addEventListener('input', function() {
         redirectMusic.volume = this.value;
       });
+
       links.forEach(link => {
         link.addEventListener('click', (e) => {
+          // On laisse l'animation se jouer avant la redirection
+          if (link.classList.contains('click-animation')) {
+            e.preventDefault();
+            return;
+          }
+
           e.preventDefault();
           currentRedirectUrl = link.getAttribute('data-url');
-          // Afficher la page de redirection
-          redirectPage.style.display = 'block';
-          createNeonStars('redirectNeonStars');
-          // Lancer la musique
-          redirectMusic.currentTime = 0;
-          redirectMusic.volume = volumeSlider.value;
-          redirectMusic.play().catch(error => {
-            console.log("La lecture automatique a été bloquée :", error);
-          });
-          // Compte à rebours (25 secondes)
-          let count = 25;
-          redirectTimer.textContent = count;
-          const timer = setInterval(() => {
-            count--;
+
+          // Ajouter une animation de transition pour la page
+          document.querySelector('.cheat-page').style.opacity = '0';
+          document.querySelector('.cheat-page').style.transition = 'opacity 0.5s ease';
+
+          setTimeout(() => {
+            // Afficher la page de redirection
+            redirectPage.style.display = 'block';
+            createNeonStars('redirectNeonStars');
+            document.querySelector('.cheat-page').style.display = 'none';
+            document.querySelector('.cheat-page').style.opacity = '1';
+
+            // Lancer la musique
+            redirectMusic.currentTime = 0;
+            redirectMusic.volume = volumeSlider.value;
+            redirectMusic.play().catch(error => {
+              console.log("La lecture automatique a été bloquée :", error);
+            });
+
+            // Compte à rebours (25 secondes)
+            let count = 25;
             redirectTimer.textContent = count;
-            if (count <= 0) {
-              clearInterval(timer);
-              // Redirection directe vers l'URL
-              window.location.href = currentRedirectUrl;
-              redirectPage.style.display = 'none';
-              redirectMusic.pause();
-            }
-          }, 1000);
+
+            const timer = setInterval(() => {
+              count--;
+              redirectTimer.textContent = count;
+
+              if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = currentRedirectUrl;
+                redirectPage.style.display = 'none';
+                redirectMusic.pause();
+              }
+            }, 1000);
+          }, 500);
         });
       });
     }
@@ -475,6 +589,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       createNeonStars('neonStars');
       setupCustomCursor();
+      setupCheatAnimations();
       setupDownloadLinks();
     });
 
@@ -1115,6 +1230,7 @@
         setTimeout(() => {
           document.title = "Cheat";
           document.getElementById('cheatPage').style.display = 'block';
+          createNeonStars('cheatNeonStars');
         }, 1500);
       } else {
         infosDiv.textContent = "❌ Erreur: " + result.error;
